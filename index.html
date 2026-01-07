@@ -42,7 +42,8 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            min-height: calc(100vh - 35px);
+            /* MODIFICATION: Ajustement du calcul pour laisser place au footer (100vh - banner - footer approx) */
+            min-height: calc(100vh - 90px);
             text-align: center;
             padding: 20px;
             animation: fadeIn 2s ease-in-out;
@@ -67,7 +68,6 @@
             padding: 12px 30px;
             font-size: 0.8rem;
             z-index: 10;
-            /* Effet de pulsation subtil pour attirer l'oeil */
             box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4);
             animation: pulse-gold 2s infinite;
         }
@@ -154,15 +154,17 @@
             transition: color 0.3s;
         }
 
-        /* --- FOOTER --- */
+        /* --- FOOTER (CORRIGÉ) --- */
         footer {
-            position: absolute;
-            bottom: 20px;
+            /* MODIFICATION: Changé de absolute à relative pour éviter le chevauchement */
+            position: relative; 
+            width: 100%;
+            text-align: center;
             font-size: 0.7rem;
             color: #aaa;
             letter-spacing: 1px;
-            width: 100%;
-            text-align: center;
+            /* Ajout de padding pour l'aérer en bas */
+            padding: 20px 0 30px 0; 
         }
 
         /* --- MODALE --- */
@@ -235,7 +237,7 @@
             .action-btn { position: static; margin-bottom: 20px; display: inline-block; }
             h1 { font-size: 2rem; }
             .pilot-banner { font-size: 0.65rem; }
-            .container { min-height: auto; padding-top: 40px; }
+            .container { min-height: auto; padding-top: 40px; padding-bottom: 40px; }
         }
     </style>
 </head>

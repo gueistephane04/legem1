@@ -2,337 +2,355 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatGPT Clone</title>
-    <!-- On utilise la bibliothèque "marked" pour convertir le Markdown en HTML -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LEGEM - IA Juridique Côte d'Ivoire</title>
+    <meta name="description" content="Premier agent d'IA juridique en Côte d'Ivoire. Phase pilote exclusive.">
+    
+    <!-- Polices -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+
     <style>
-        /* ... TOUT LE CSS EST ICI ... */
+        /* --- RESET & BASE --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --white: #ffffff; --black: #000000; --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
-            --gray-300: #d1d5db; --gray-400: #9ca3af; --gray-500: #6b7280; --gray-600: #4b5563; --gray-700: #374151;
-            --gray-800: #1f2937; --gray-900: #111827; --green-500: #10b981; --green-600: #059669; --red-500: #ef4444;
-            --red-600: #dc2626; --blue-500: #3b82f6;
+
+        body, html {
+            height: 100%;
+            width: 100%;
+            font-family: 'Montserrat', sans-serif;
+            background-color: #ffffff;
+            color: #333333;
+            overflow-x: hidden; 
         }
-        [data-theme="light"] {
-            --bg-color: var(--white); --text-primary: var(--gray-800); --text-secondary: var(--gray-600);
-            --border-color: var(--gray-200); --sidebar-bg: var(--gray-50); --sidebar-hover: var(--gray-200);
-            --chat-bg: var(--white); --user-msg-bg: var(--gray-100); --user-msg-text: var(--gray-800);
-            --bot-msg-bg: var(--white); --bot-msg-text: var(--gray-800); --input-bg: var(--white);
-            --input-border: var(--gray-300); --button-bg: var(--gray-800); --button-text: var(--white);
-            --button-hover: var(--black); --success-color: var(--green-500); --error-color: var(--red-500);
+
+        /* --- BANDEAU ANNONCE PILOTE --- */
+        .pilot-banner {
+            background-color: #1a1a1a;
+            color: #d4af37; /* Couleur Or pour le côté sélect */
+            text-align: center;
+            padding: 8px 10px;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 600;
         }
-        [data-theme="dark"] {
-            --bg-color: #212121; --text-primary: #ececf1; --text-secondary: #9ca3af; --border-color: #3a3a3a;
-            --sidebar-bg: #171717; --sidebar-hover: #2d2d2d; --chat-bg: #212121; --user-msg-bg: #2f2f2f;
-            --user-msg-text: var(--white); --bot-msg-bg: #212121; --bot-msg-text: #ececf1; --input-bg: #2f2f2f;
-            --input-border: #424242; --button-bg: #19c37d; --button-text: var(--white); --button-hover: var(--green-600);
-            --success-color: var(--green-500); --error-color: var(--red-500);
+
+        /* --- LAYOUT CENTRAL --- */
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 35px);
+            text-align: center;
+            padding: 20px;
+            animation: fadeIn 2s ease-in-out;
+            position: relative;
         }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: var(--bg-color); color: var(--text-primary); display: flex; height: 100vh; transition: background-color 0.2s ease, color 0.2s ease; }
-        .sidebar { width: 260px; background: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; transition: background-color 0.2s ease; padding: 8px; }
-        .sidebar-header { display: flex; gap: 8px; align-items: center; padding: 8px; margin-bottom: 16px; }
-        .new-chat-btn { flex-grow: 1; padding: 12px; background: var(--sidebar-bg); border: none; border-radius: 8px; color: var(--text-primary); cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px; transition: all 0.2s ease; }
-        .new-chat-btn:hover { background: var(--sidebar-hover); }
-        .sidebar-menu { flex: 1; overflow-y: auto; }
-        .menu-item { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; color: var(--text-secondary); transition: all 0.2s ease; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .menu-item:hover, .conversation-item:hover { background: var(--sidebar-hover); color: var(--text-primary); }
-        .menu-item.active, .conversation-item.active { background: var(--sidebar-hover); color: var(--text-primary); }
-        .conversations-header { padding: 16px 16px 8px; font-size: 12px; font-weight: 500; color: var(--text-secondary); text-transform: uppercase; }
-        .conversations { padding: 0 8px; }
-        .conversation-item { position: relative; padding-right: 30px; }
-        .delete-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer; opacity: 0; transition: opacity 0.2s ease; padding: 4px; font-size: 16px; border-radius: 4px; }
-        .conversation-item:hover .delete-btn { opacity: 1; }
-        .delete-btn:hover { color: var(--error-color); }
-        .sidebar-footer { padding: 16px; border-top: 1px solid var(--border-color); }
-        .main-content { flex: 1; display: flex; flex-direction: column; background: var(--chat-bg); }
-        .chat-header { padding: 16px 24px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; background: var(--chat-bg); }
-        .hamburger { display: none; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-primary); }
-        .model-info { font-size: 18px; font-weight: 600; color: var(--text-primary); }
-        .header-controls { display: flex; align-items: center; gap: 8px; }
-        .theme-toggle { background: none; border: none; cursor: pointer; font-size: 20px; padding: 8px; border-radius: 6px; transition: all 0.2s ease; color: var(--text-primary); }
-        .theme-toggle:hover { background: var(--sidebar-hover); }
-        .chat-container { flex: 1; overflow-y: auto; position: relative; display: flex; flex-direction: column; }
-        .welcome-screen { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; margin-bottom: 10vh; }
-        .welcome-logo { width: 50px; height: 50px; background: var(--black); color: var(--white); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; }
-        .welcome-logo svg { width: 30px; height: 30px; }
-        .welcome-title { font-size: 24px; font-weight: 600; color: var(--text-primary); }
-        [data-theme="dark"] .welcome-logo { background: var(--white); color: var(--black); }
-        .messages-wrapper { max-width: 800px; width: 100%; margin: 0 auto; padding: 24px; }
-        .message-group { margin-bottom: 32px; }
-        .message { display: flex; gap: 16px; align-items: flex-start; }
-        .message-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; flex-shrink: 0; }
-        .user-avatar { background: var(--green-500); color: var(--white); }
-        .bot-avatar { background: var(--black); color: var(--white); padding: 5px; }
-        [data-theme="dark"] .bot-avatar { background: var(--white); color: var(--black); }
-        .bot-avatar svg { width: 100%; height: 100%; }
-        .message-content { flex: 1; line-height: 1.7; font-size: 16px; padding-top: 4px; }
-        .message-content p { margin-top: 0; margin-bottom: 1rem; }
-        .input-area { padding: 16px 24px 24px; background: var(--chat-bg); }
-        .input-container { max-width: 800px; margin: 0 auto; position: relative; }
-        .input-wrapper { background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 24px; padding: 6px; display: flex; align-items: flex-end; gap: 8px; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .input-wrapper:focus-within { border-color: var(--gray-500); }
-        .message-input { flex: 1; border: none; background: none; outline: none; resize: none; font-size: 16px; line-height: 1.5; color: var(--text-primary); max-height: 200px; min-height: 24px; font-family: inherit; padding: 10px 0; }
-        .message-input::placeholder { color: var(--text-secondary); }
-        .send-button { width: 32px; height: 32px; background: var(--button-bg); border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; margin: 4px; }
-        .send-button:hover:not(:disabled) { background: var(--button-hover); }
-        .send-button:disabled { background: var(--gray-300); cursor: not-allowed; }
-        .send-button svg { width: 16px; height: 16px; fill: var(--button-text); }
-        [data-theme="dark"] .send-button:disabled { background: var(--gray-600); }
-        .loading{display:inline-block;width:20px;height:20px;border:2px solid var(--border-color);border-radius:50%;border-top-color:var(--button-bg);animation:spin 1s ease-in-out infinite}@keyframes spin{to{transform:rotate(360deg)}}
-        @media (max-width: 768px) { .sidebar { position: fixed; left: -260px; top: 0; height: 100%; z-index: 100; transition: left 0.3s ease; } .sidebar.open { left: 0; box-shadow: 0 0 40px rgba(0,0,0,0.2); } .main-content { width: 100%; } .hamburger { display: block; } .messages-wrapper, .input-area { padding: 16px; } }
+
+        /* --- BOUTON D'ACTION (HAUT-GAUCHE) --- */
+        .action-btn {
+            position: absolute;
+            top: 30px;
+            left: 50px; /* Déplacé à gauche */
+            text-decoration: none;
+            color: #ffffff;
+            background-color: #1a1a1a;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border: 1px solid #1a1a1a;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            padding: 12px 30px;
+            font-size: 0.8rem;
+            z-index: 10;
+            /* Effet de pulsation subtil pour attirer l'oeil */
+            box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4);
+            animation: pulse-gold 2s infinite;
+        }
+
+        @keyframes pulse-gold {
+            0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(212, 175, 55, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+        }
+
+        .action-btn:hover {
+            background-color: #d4af37;
+            border-color: #d4af37;
+            color: #1a1a1a;
+        }
+
+        /* --- TYPOGRAPHIE --- */
+        .brand-container {
+            margin-bottom: 30px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        .brand-name {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            font-size: 1.5rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #000;
+            display: inline-block;
+        }
+
+        .pilot-badge {
+            font-size: 0.6rem;
+            vertical-align: top;
+            background: #eee;
+            padding: 2px 6px;
+            border-radius: 3px;
+            letter-spacing: 1px;
+            margin-left: 5px;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.2rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 25px;
+            line-height: 1.1;
+        }
+
+        p.subtext {
+            font-size: 1.1rem;
+            font-weight: 300;
+            color: #555;
+            margin-bottom: 40px;
+            max-width: 800px;
+            line-height: 1.8;
+        }
+
+        .highlight {
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        /* --- LIEN EMAIL --- */
+        .contact-box { margin-top: 20px; }
+        .contact-label {
+            display: block;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #999;
+            margin-bottom: 10px;
+        }
+        .email-link {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: #1a1a1a;
+            text-decoration: none;
+            position: relative;
+            font-style: italic;
+            transition: color 0.3s;
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            position: absolute;
+            bottom: 20px;
+            font-size: 0.7rem;
+            color: #aaa;
+            letter-spacing: 1px;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* --- MODALE --- */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .modal.show { display: flex; opacity: 1; }
+        .modal-content {
+            background-color: #fff;
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 2px;
+        }
+        .modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        .modal-subtitle {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+
+        /* FORMULAIRE */
+        .form-group { margin-bottom: 18px; text-align: left; }
+        .form-group label {
+            display: block; font-size: 0.75rem; color: #444; margin-bottom: 5px;
+            text-transform: uppercase; letter-spacing: 1px; font-weight: 600;
+        }
+        .form-group input {
+            width: 100%; padding: 10px 0; border: none; border-bottom: 1px solid #ccc;
+            font-family: 'Montserrat', sans-serif; font-size: 1rem;
+            outline: none; transition: border-color 0.3s;
+        }
+        .form-group input:focus { border-bottom: 2px solid #1a1a1a; }
+        
+        .submit-btn {
+            width: 100%; background-color: #1a1a1a; color: #fff; padding: 16px;
+            border: none; font-family: 'Montserrat', sans-serif; text-transform: uppercase;
+            letter-spacing: 2px; font-weight: 600; cursor: pointer; margin-top: 10px;
+        }
+
+        #successMessage { display: none; text-align: center; }
+
+        /* --- ANIMATION --- */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === MOBILE === */
+        @media (max-width: 768px) {
+            .action-btn { position: static; margin-bottom: 20px; display: inline-block; }
+            h1 { font-size: 2rem; }
+            .pilot-banner { font-size: 0.65rem; }
+            .container { min-height: auto; padding-top: 40px; }
+        }
     </style>
 </head>
-<body data-theme="dark">
-    
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <button class="new-chat-btn" onclick="startNewChat()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-                <span>New chat</span>
-            </button>
+<body>
+
+    <div class="pilot-banner">
+        Phase Pilote Exclusive : L'IA Juridique Pionnière en Côte d'Ivoire
+    </div>
+
+    <div class="container">
+        <!-- Bouton en Haut à Gauche -->
+        <a id="openFormBtn" class="action-btn">Nous rejoindre</a>
+
+        <div class="brand-container">
+            <div class="brand-name">LEGEM AFRICA</div>
+            <span class="pilot-badge">PILOTE</span>
         </div>
-        <div class="sidebar-menu">
-            <div class="conversations-header">Chats</div>
-            <div class="conversations" id="conversations"></div>
-        </div>
-        <div class="sidebar-footer">
-            <div class="menu-item">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                <span>Stephane Guei</span>
-            </div>
+
+        <h1>L'intelligence artificielle au service du droit ivoirien.</h1>
+        
+        <p class="subtext">
+            Legem prépare le lancement de son agent IA dédié aux professionnels du droit.<br>
+            <span class="highlight">Nous ouvrons actuellement un accès privilégié et gratuit</span> à une sélection limitée de cabinets et juristes en Côte d'Ivoire pour co-construire l'avenir de la profession.
+        </p>
+
+        <div class="contact-box">
+            <span class="contact-label">Demande d'information</span>
+            <a href="mailto:contact@legem.africa" class="email-link">contact@legem.africa</a>
         </div>
     </div>
 
-    <div class="main-content">
-        <div class="chat-header">
-            <button class="hamburger" onclick="toggleSidebar()">☰</button>
-            <div class="model-info">ChatGPT</div>
-            <div class="header-controls">
-                <button class="theme-toggle" onclick="toggleTheme()" title="Changer le thème">🌙</button>
+    <footer>
+        &copy; 2025 Legem Africa. Abidjan, Côte d'Ivoire.
+    </footer>
+
+    <!-- MODALE -->
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" style="float:right; cursor:pointer; font-size: 24px;">&times;</span>
+            <h2 class="modal-title" id="modalTitle">Candidature Pilote</h2>
+            <p class="modal-subtitle">Les places pour la phase de test gratuit sont limitées. Notre équipe reviendra vers vous après analyse de votre profil.</p>
+            
+            <div id="successMessage">
+                <h3 style="color:#d4af37; font-family:'Playfair Display'; margin-bottom:10px;">Demande reçue</h3>
+                <p>Votre profil est en cours d'examen. Vous recevrez une réponse sous peu.</p>
             </div>
-        </div>
-        <div class="chat-container" id="chatContainer">
-            <div class="welcome-screen" id="welcomeScreen">
-                <div class="welcome-logo">
-                    <svg viewBox="0 0 41 41"><path fill="currentColor" d="M37.532 19.2c-1.176 1.76-2.82 3.295-4.464 4.59-1.644 1.3-3.29 2.36-4.933 3.18-.035.018-.07.036-.106.053-1.644.82-3.29 1.3-4.933 1.467-.036.002-.07.003-.106.003-1.644-.165-3.29-.645-4.934-1.467-.035-.017-.07-.035-.106-.053-1.643-.82-3.29-1.88-4.933-3.18-1.643-1.295-3.288-2.83-4.464-4.59-1.177-1.76-1.765-3.52-1.765-5.28s.588-3.52 1.765-5.28c1.176-1.76 2.82-3.295 4.464-4.59 1.644-1.3 3.29-2.36 4.934-3.18.035-.018.07-.036.106-.053 1.643-.82 3.29-1.3 4.933-1.467.036-.002.07-.003.106-.003s.07.001.106.003c1.644.166 3.29.646 4.934 1.467.035.017.07.035.106.053 1.643.82 3.29 1.88 4.933 3.18 1.643 1.295 3.288 2.83 4.464 4.59 1.177 1.76.588 3.52.588 5.28s-.588 3.52-1.765 5.28zM20.5 35.26c-1.37-.137-2.74-.54-4.11-1.205-1.37-.665-2.74-1.595-4.11-2.79-1.37-1.19-2.495-2.6-3.38-4.07-1.77-2.945-1.77-6.42 0-9.365.885-1.47 2.01-2.88 3.38-4.07 1.37-1.195 2.74-2.125 4.11-2.79 1.37-.665 2.74-1.07 4.11-1.205 2.945-.27 5.89.815 7.99 2.915 2.1 2.1 3.185 5.045 2.915 7.99-.135 1.37-.54 2.74-1.205 4.11-.665 1.37-1.595 2.74-2.79 4.11-1.19 1.37-2.6 2.495-4.07 3.38-1.47.885-2.88 1.53-4.245 1.935a8.216 8.216 0 0 1-1.765.175z"></path></svg>
+
+            <form id="legemForm">
+                <div class="form-group">
+                    <label>Nom & Prénoms</label>
+                    <input type="text" name="NomComplet" required>
                 </div>
-                <h1 class="welcome-title">What can I help with?</h1>
-            </div>
-            <div class="messages-wrapper" id="messagesWrapper"></div>
-        </div>
-        <div class="input-area">
-            <div class="input-container">
-                <div class="input-wrapper">
-                    <textarea class="message-input" id="messageInput" placeholder="Ask anything..." rows="1" onkeydown="handleKeyDown(event)" oninput="autoResize()"></textarea>
-                    <button class="send-button" id="sendButton" onclick="sendMessage()" disabled>
-                        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-                    </button>
+                <div class="form-group">
+                    <label>Cabinet ou Organisation</label>
+                    <input type="text" name="Organisation" required>
                 </div>
-            </div>
+                <div class="form-group">
+                    <label>Profession</label>
+                    <input type="text" name="Fonction" placeholder="Avocat, Juriste, Notaire..." required>
+                </div>
+                <div class="form-group">
+                    <label>Ville</label>
+                    <input type="text" name="Ville" placeholder="Abidjan, San-Pedro..." required>
+                </div>
+                <div class="form-group">
+                    <label>E-mail Professionnel</label>
+                    <input type="email" name="Email" required>
+                </div>
+                <button type="submit" id="submitBtn" class="submit-btn">Soumettre ma candidature</button>
+            </form>
         </div>
     </div>
 
     <script>
-        let currentConversationId = null;
-        let conversations = {};
-        let isLoading = false;
-        const config = {
-            // J'AI MIS VOTRE ID DE CHATFLOW QUI FONCTIONNE ICI
-            apiUrl: 'https://srv886023.hstgr.cloud/api/v1/prediction/b02cce0c-77a8-4b4f-8a4a-0de7afd15fc2'
-        };
+        const modal = document.getElementById("contactModal");
+        const btn = document.getElementById("openFormBtn");
+        const span = document.getElementsByClassName("close-btn")[0];
+        
+        btn.onclick = function() {
+            modal.classList.add("show");
+            document.body.style.overflow = "hidden";
+            document.getElementById("legemForm").style.display = "block";
+            document.getElementById("successMessage").style.display = "none";
+        }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadConversations();
-            const savedTheme = localStorage.getItem('theme') || 'dark';
-            setTheme(savedTheme);
-            renderConversation();
-            document.getElementById('messageInput').addEventListener('input', () => {
-                autoResize();
-                document.getElementById('sendButton').disabled = document.getElementById('messageInput').value.trim() === '' || isLoading;
-            });
+        span.onclick = function() {
+            modal.classList.remove("show");
+            document.body.style.overflow = "auto";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.classList.remove("show");
+                document.body.style.overflow = "auto";
+            }
+        }
+
+        document.getElementById("legemForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById("submitBtn");
+            submitBtn.textContent = "Traitement...";
+            
+            const formData = new FormData(this);
+            fetch("https://formsubmit.co/ajax/contact@legem.africa", {
+                method: "POST",
+                body: formData
+            })
+            .then(() => {
+                document.getElementById("legemForm").style.display = "none";
+                document.getElementById("modalTitle").style.display = "none";
+                document.querySelector(".modal-subtitle").style.display = "none";
+                document.getElementById("successMessage").style.display = "block";
+            })
+            .catch(() => alert("Erreur. Veuillez réessayer."));
         });
-
-        function setTheme(theme) { document.body.setAttribute('data-theme', theme); localStorage.setItem('theme', theme); document.querySelector('.theme-toggle').textContent = theme === 'light' ? '🌙' : '☀️'; }
-        function toggleTheme() { setTheme(document.body.getAttribute('data-theme') === 'light' ? 'dark' : 'light'); }
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
-        
-        function loadConversations() { conversations = JSON.parse(localStorage.getItem('chat-conversations') || '{}'); updateConversationsList(); }
-        function saveConversations() { localStorage.setItem('chat-conversations', JSON.stringify(conversations)); }
-        
-        function startNewChat() {
-            currentConversationId = `chat_${Date.now()}`;
-            conversations[currentConversationId] = { id: currentConversationId, title: 'Nouvelle conversation', messages: [], createdAt: new Date().toISOString() };
-            renderConversation();
-            updateConversationsList();
-            saveConversations();
-            document.getElementById('messageInput').focus();
-        }
-        function selectConversation(id) { currentConversationId = id; renderConversation(); updateConversationsList(); }
-        function deleteConversation(id, event) {
-            event.stopPropagation();
-            if (!confirm('Supprimer cette conversation ?')) return;
-            delete conversations[id];
-            if (currentConversationId === id) currentConversationId = null;
-            renderConversation();
-            updateConversationsList();
-            saveConversations();
-        }
-        function updateConversationsList() {
-            const container = document.getElementById('conversations');
-            container.innerHTML = '';
-            Object.values(conversations)
-                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                .forEach(conv => {
-                    const item = document.createElement('div');
-                    item.className = `menu-item conversation-item ${conv.id === currentConversationId ? 'active' : ''}`;
-                    item.onclick = () => selectConversation(conv.id);
-                    item.innerHTML = `<span>${conv.title}</span><button class="delete-btn" onclick="deleteConversation('${conv.id}', event)">🗑️</button>`;
-                    container.appendChild(item);
-                });
-        }
-
-        function renderConversation() {
-            const wrapper = document.getElementById('messagesWrapper');
-            const welcomeScreen = document.getElementById('welcomeScreen');
-            wrapper.innerHTML = '';
-            if (currentConversationId && conversations[currentConversationId]) {
-                welcomeScreen.style.display = 'none';
-                conversations[currentConversationId].messages.forEach(msg => addMessageToUI(msg.content, msg.isUser));
-            } else {
-                welcomeScreen.style.display = 'flex';
-            }
-        }
-        
-        function addMessageToUI(content, isUser) {
-            const wrapper = document.getElementById('messagesWrapper');
-            const group = document.createElement('div');
-            group.className = 'message-group';
-            group.innerHTML = `
-                <div class="message ${isUser ? 'user-message' : 'bot-message'}">
-                    <div class="message-avatar ${isUser ? 'user-avatar' : 'bot-avatar'}">
-                        ${isUser ? 'S' : '<svg viewBox="0 0 41 41"><path fill="currentColor" d="M37.532 19.2c-1.176 1.76-2.82 3.295-4.464 4.59-1.644 1.3-3.29 2.36-4.933 3.18-.035.018-.07.036-.106.053-1.644.82-3.29 1.3-4.933 1.467-.036.002-.07.003-.106.003-1.644-.165-3.29-.645-4.934-1.467-.035-.017-.07-.035-.106-.053-1.643-.82-3.29-1.88-4.933-3.18-1.643-1.295-3.288-2.83-4.464-4.59-1.177-1.76-1.765-3.52-1.765-5.28s.588-3.52 1.765-5.28c1.176-1.76 2.82-3.295 4.464-4.59 1.644-1.3 3.29-2.36 4.934-3.18.035-.018.07-.036.106-.053 1.643-.82 3.29-1.3 4.933-1.467.036-.002.07-.003.106-.003s.07.001.106.003c1.644.166 3.29.646 4.934 1.467.035.017.07.035.106.053 1.643.82 3.29 1.88 4.933 3.18 1.643 1.295 3.288 2.83 4.464 4.59 1.177 1.76.588 3.52.588 5.28s-.588 3.52-1.765 5.28zM20.5 35.26c-1.37-.137-2.74-.54-4.11-1.205-1.37-.665-2.74-1.595-4.11-2.79-1.37-1.19-2.495-2.6-3.38-4.07-1.77-2.945-1.77-6.42 0-9.365.885-1.47 2.01-2.88 3.38-4.07 1.37-1.195 2.74-2.125 4.11-2.79 1.37-.665 2.74-1.07 4.11-1.205 2.945-.27 5.89.815 7.99 2.915 2.1 2.1 3.185 5.045 2.915 7.99-.135 1.37-.54 2.74-1.205 4.11-.665 1.37-1.595 2.74-2.79 4.11-1.19 1.37-2.6 2.495-4.07 3.38-1.47.885-2.88 1.53-4.245 1.935a8.216 8.216 0 0 1-1.765.175z"></path></svg>'}
-                    </div>
-                    <!-- On s'assure que le contenu du bot est directement inséré ici -->
-                    <div class="message-content">${isUser ? `<p>${content.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>` : content}</div>
-                </div>
-            `;
-            wrapper.appendChild(group);
-            scrollToBottom();
-            return group.querySelector('.message-content');
-        }
-        
-        function saveMessage(content, isUser) {
-            if (!currentConversationId) return;
-            const conv = conversations[currentConversationId];
-            conv.messages.push({ content, isUser });
-            if (conv.messages.length === 1 && isUser) {
-                conv.title = content.substring(0, 30);
-                updateConversationsList();
-            }
-            saveConversations();
-        }
-        
-        // =========================================================================
-        // ======================= FONCTION MODIFIÉE POUR LE STREAMING =======================
-        // =========================================================================
-        async function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const message = input.value.trim();
-            if (!message || isLoading) return;
-
-            if (!currentConversationId) startNewChat();
-
-            saveMessage(message, true);
-            addMessageToUI(message, true);
-            input.value = ''; autoResize(); setLoading(true);
-
-            const botMessageElement = addMessageToUI('<span class="loading"></span>', false);
-            let fullResponse = '';
-            let isFirstChunk = true;
-
-            try {
-                // 1. On change l'URL pour utiliser l'endpoint de streaming de Flowise
-                const streamingUrl = config.apiUrl.replace('/prediction/', '/prediction/stream/');
-
-                const response = await fetch(streamingUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ "question": message })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Erreur serveur: ${response.status} ${response.statusText}`);
-                }
-
-                // 2. On utilise un lecteur pour lire le flux de données (stream)
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
-
-                if (isFirstChunk) {
-                    botMessageElement.innerHTML = ''; // On enlève l'icône de chargement
-                    isFirstChunk = false;
-                }
-                
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break; // Le stream est terminé
-
-                    const chunk = decoder.decode(value, { stream: true });
-                    
-                    // On traite chaque ligne du chunk, car il peut contenir plusieurs événements
-                    const lines = chunk.split('\n');
-                    for (const line of lines) {
-                        if (line.startsWith('data: ')) {
-                            try {
-                                const dataContent = line.substring(6).trim();
-                                if (dataContent === "[DONE]") break; // Message de fin
-                                if (dataContent) {
-                                    const jsonData = JSON.parse(dataContent);
-                                    const token = jsonData.text || jsonData.token || '';
-                                    fullResponse += token;
-                                    // 3. Effet "machine à écrire": on met à jour le HTML avec le texte et un curseur
-                                    botMessageElement.innerHTML = marked.parse(fullResponse + ' ▌');
-                                    scrollToBottom();
-                                }
-                            } catch (e) {
-                                console.error("Erreur de parsing du chunk JSON:", line);
-                            }
-                        }
-                    }
-                }
-
-            } catch (error) {
-                fullResponse = `❌ Erreur: ${error.message}`;
-                botMessageElement.innerHTML = marked.parse(fullResponse);
-            } finally {
-                // 4. Nettoyage final: on enlève le curseur
-                botMessageElement.innerHTML = marked.parse(fullResponse);
-                scrollToBottom();
-                
-                // On sauvegarde le message complet une fois que tout est reçu
-                if (fullResponse && !fullResponse.startsWith('❌')) {
-                    saveMessage(fullResponse, false);
-                }
-                
-                setLoading(false);
-            }
-        }
-
-
-        function setLoading(loading) {
-            isLoading = loading;
-            const sendButton = document.getElementById('sendButton');
-            document.getElementById('messageInput').disabled = loading;
-            sendButton.disabled = loading || document.getElementById('messageInput').value.trim() === '';
-            sendButton.innerHTML = loading ? '<div class="loading"></div>' : '<svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>';
-            if (!loading) document.getElementById('messageInput').focus();
-        }
-
-        const autoResize = () => { const textarea = document.getElementById('messageInput'); textarea.style.height = 'auto'; textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`; };
-        const scrollToBottom = () => { const container = document.getElementById('chatContainer'); container.scrollTop = container.scrollHeight; };
-        const handleKeyDown = (event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); } };
     </script>
 </body>
 </html>
